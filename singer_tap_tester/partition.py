@@ -2,10 +2,12 @@ from collections import defaultdict
 import json
 import logging
 
-
+# TODO: Change the logger
 LOG = logging.getLogger('alu_tester.partition')
 
-
+# TODO: What is this API? What are the messages? How to process it?
+# - Honestly, it might just make sense to process it like a stream and just give the raw record output.
+# - All this "messages by type" and "records_by_stream" feels like gold plating
 def by_stream(tap_output):
     """Given a dictionary of enumerated records, remove the indexes
 

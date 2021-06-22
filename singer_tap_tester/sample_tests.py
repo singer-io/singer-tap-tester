@@ -1,5 +1,9 @@
 import unittest
 
+# TODO: This is the bread and butter of this. Base_Test suite should be a module that defines these pieces with a usable API that someone could extend.
+# - Things like ensuring at startup that the child class has implemented everything.
+# - It should be very friendly.
+
 class EnableTest(unittest.TestCase):
     __test__ = True
 

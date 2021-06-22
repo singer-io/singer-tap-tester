@@ -5,17 +5,26 @@ import logging
 
 LOG = logging.getLogger('alu_tester.user')
 
+# TODO: What's the proper set of API functions here? This feels too verbose, but then again, the previous one felt too terse
+# - Perhaps just having "select field" and "select stream" available, and allow folks to group them together as they see fit.
+# - No need to provide an abstraction for a "map", comprehension, or "for"
+# TODO: Can we do type hints somehow? Is that useful? Does that restrict valid Python versions too much?
 
-def select_stream(metadata_entry):
+# TODO: API style. Should it be immutable or mutable? I feel like for user interaction we want mutable, but who knows what the expectation is.
+
+def select_stream(catalog_entry):
     """Appends `selected` metadata to the stream"""
 
-    modified_entry = deepcopy(metadata_entry)
+    modified_entry = deepcopy(catalog_entry)
 
-    if modified_entry['breadcrumb'] == []:
+    for breadcrumb, md in modified_entry['metadata']:
+        if breadcrumb
         modified_entry['metadata']['selected'] = 'true'
 
     return modified_entry
 
+def select_stream(catalog, stream_name):
+    return select_stream
 
 def select_all_streams(catalog):
     """Loop over a catalog and select the streams"""
@@ -29,17 +38,7 @@ def select_all_streams(catalog):
                                      for metadata_entry in catalog_entry['metadata']]
     return modified_catalog
 
-
-def select_certain_streams(catalog, certain_streams):
-    """Loop over a catalog and select `certain_streams`"""
-
-    return select_all_streams(
-        {"streams": [catalog_entry
-                     for catalog_entry in catalog['streams']
-                     if catalog_entry['tap_stream_id'] in certain_streams]}
-    )
-
-def select_a_field(metadata_entry):
+def select_field(metadata_entry):
     metadata_entry['metadata']['selected'] = 'true'
     return metadata_entry
 
@@ -53,37 +52,3 @@ def select_all_fields(catalog):
 def select_all_streams_and_fields(catalog):
     modified_catalog = select_all_streams(catalog)
     return select_all_fields(modified_catalog)
-
-def select_some_fields(catalog, fields):
-    for catalog_entry in catalog['streams']:
-        for metadata_entry in catalog_entry['metadata']:
-            if metadata_entry['breadcrumb'] is not [] and metadata_entry['breadcrumb'][1] in fields:
-                metadata_entry['metadata']['selected'] = 'true'
-    return catalog
-
-def get_records_from_target_output(target_output_file):
-    records_by_stream = {}
-    for batch in target_output_file:
-        stream = batch.get('table_name')
-        if stream not in records_by_stream:
-            records_by_stream[stream] = {'messages': [],
-                                         'schema': batch['schema'],
-                                         'key_names' : batch.get('key_names'),
-                                         'table_version': batch.get('table_version')}
-        records_by_stream[stream]['messages'] += batch['messages']
-    return records_by_stream
-
-def examine_target_output_for_fields(target_output_file):
-    fields_by_stream = defaultdict(set)
-    for batch in target_output_file:
-        stream = batch.get('table_name')
-        for message in batch.get('messages'):
-            if message['action'] == 'upsert':
-                fields_by_stream[stream].update(set(message.get("data", {}).keys()))
-    return fields_by_stream
-
-def examine_target_output_file(target_output_file):
-    messages_per_stream = {}
-    fields_by_stream = get_records_from_target_output(target_output_file)
-
-    return {stream: len(value['messages']) for stream, value in fields_by_stream.items() }
