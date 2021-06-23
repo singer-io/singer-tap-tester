@@ -1,3 +1,4 @@
+import unittest
 from singer_tap_tester import user
 
 class TestStreamSelection(unittest.TestCase):

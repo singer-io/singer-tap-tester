@@ -1,8 +1,6 @@
-from . import connections
-from . import partition
-from . import state
 from . import user
 
+from .sample_tests import StandardTests
 from io import StringIO
 import sys
 import unittest
@@ -21,45 +19,6 @@ def capture_output(func, *args, **kwargs):
     if getbuffer:
         return temp_out
     return temp_out.getvalue()
-
-
-class BaseTest(unittest.TestCase):
-
-    def setUp(self):
-        # import ipdb;
-        # ipdb.set_trace()
-        pass
-
-    def tearDown(self):
-        pass
-
-    def test_run(self):
-        self.assertEqual({"my": "config", "bad": "config"},
-                         connections.get_config())
-
-
-class DiscoveryTest(BaseTest):
-    pass
-
-
-class AutomaticFieldsTest(BaseTest):
-    pass
-
-
-class StartDateTest(BaseTest):
-    pass
-
-
-class PaginationTest(BaseTest):
-    pass
-
-
-class BookmarksTest(BaseTest):
-    pass
-
-
-class AllFieldsTest(BaseTest):
-    pass
 
 if __name__ == '__main__':
     unittest.main()

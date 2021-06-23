@@ -18,8 +18,8 @@ def select_stream(catalog_entry):
     modified_entry = deepcopy(catalog_entry)
 
     for breadcrumb, md in modified_entry['metadata']:
-        if breadcrumb
-        modified_entry['metadata']['selected'] = 'true'
+        if breadcrumb == []:
+            modified_entry['metadata']['selected'] = 'true'
 
     return modified_entry
 
