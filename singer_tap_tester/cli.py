@@ -5,6 +5,8 @@ import sys
 import unittest.mock
 import tempfile
 
+# TODO: Logging
+
 class PatchStdOut():
     """
     Context Manager that will take stdout and patch it such that any tap
@@ -44,23 +46,25 @@ def __call_entry_point(run_command):
                           if fun.name == run_command]
     if not found_entry_points:
         raise Exception(f"No entrypoints found in current (virtual) environment to run tap using command: '{run_command}'")
-    if not found_entry_points:
+    if len(found_entry_points) > 1:
         raise Exception(f"Ambiguous entry_point - {len(found_entry_points)} entrypoints found in current (virtual) environment to run tap using command: '{run_command}'")
     discovered_main = entry_points[0].resolve()
     return discovered_main()
 
 # TODO: How to structure this? I'd kind of like to just build a runner object that does all the things it needs. Might get out of control? Not sure...
 
-def run_discovery(config):
+def run_discovery(cli_command, config):
     # Call it with mocks and temp files to simulate CLI
     patched_io = PatchStdOut()
+
+    # TODO: Log the run command and write an actual file with the tap_discover_config so that we can use it in the future to get files to run for debugging
     with patched_io, \
          tempfile.NamedTemporaryFile(mode='w') as config_file, \
          unittest.mock.patch('sys.argv', ['tap-tester', '--discover', '--config', config_file.name]):
         
         json.dump(config, config_file)
         config_file.flush()
-        __call_entry_point()
+        __call_entry_point(cli_command)
 
         # Return result of mocked sys.stdout
         return patched_io.out.getvalue()
