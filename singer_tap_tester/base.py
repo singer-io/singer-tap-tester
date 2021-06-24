@@ -1,6 +1,8 @@
 import unittest
 import os
 
+from .standard_tests import test_sync_canary, test_catalog_standards
+
 class EnableSubTests(type):
     """
     Defines a metaclass that marks any class defined outside of
@@ -25,7 +27,7 @@ class BaseTapTest(unittest.TestCase, metaclass=EnableSubTests):
     __test__ = False
 
     # Required for a fully formed tap-test to be implemented
-    required_subclass_functions = ["config_environment", "tap_name"]
+    subclass_requirements = ["config_environment", "tap_name", "get_config"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -33,10 +35,10 @@ class BaseTapTest(unittest.TestCase, metaclass=EnableSubTests):
         self.check_config_environment()
 
     def check_subclass_requirements(self):
-        missing_implementations = [req for req in self.required_subclass_functions
+        missing_implementations = [req for req in self.subclass_requirements
                                    if not hasattr(self, req)]
         if missing_implementations:
-            raise NotImplementedError(f"{self.__class__.__name__}: TestCases derived from singer_tap_tester.BaseTapTest must implement these functions (see `{self.__class__.__name__}.required_subclass_functions` for the full list): {missing_implementations}")
+            raise NotImplementedError(f"{self.__class__.__name__}: TestCases derived from singer_tap_tester.BaseTapTest must implement these functions or properties (see `{self.__class__.__name__}.subclass_requirements` for the full list): {missing_implementations}")
 
     def check_config_environment(self):
         missing_envs = [x for x in self.config_environment()
@@ -44,18 +46,9 @@ class BaseTapTest(unittest.TestCase, metaclass=EnableSubTests):
         if missing_envs:
             raise Exception(f"Missing environment variables required to run the tap for this test: {missing_envs}")
 
-def test_sync_canary(scenario):
-    # Do the test and assertions here
-    print("Did canary test!")
-    pass
-
-def test_discovery(scenario):
-    print("Did discovery test!")
-    pass
-
 standard_test_functions = {
     test_sync_canary,
-    test_discovery,
+    test_catalog_standards,
     }
 
 class StandardTests(BaseTapTest):

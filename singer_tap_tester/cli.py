@@ -50,7 +50,7 @@ def __call_entry_point(run_command):
         raise Exception(f"No entrypoints found in current (virtual) environment to run tap using command: '{run_command}'")
     if len(found_entry_points) > 1:
         raise Exception(f"Ambiguous entry_point - {len(found_entry_points)} entrypoints found in current (virtual) environment to run tap using command: '{run_command}'")
-    discovered_main = entry_points[0].resolve()
+    discovered_main = found_entry_points[0].resolve()
     return discovered_main()
 
 @contextmanager
@@ -98,11 +98,7 @@ def run_discovery(tap_entry_point, config):
 
     # Run check mode so we can validate the creds. Should not sync any records
     LOGGER.info("Running sync without catalog to validate config.")
-    __run_tap(tap_entry_point, config=config, discover=True)
+    __run_tap(tap_entry_point, config=config)
 
-    with patched_io, \
-         tempfile.NamedTemporaryFile(mode='w') as config_file, \
-         unittest.mock.patch('sys.argv', ['tap-tester', '--config', config_file.name]):
-        __call_entry_point()
     return catalog
 

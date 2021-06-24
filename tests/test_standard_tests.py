@@ -5,17 +5,24 @@ from singer_tap_tester import StandardTests
 
 # Actual Usage Example
 class TestGithubStandard(StandardTests):
-    def tap_name(self):
-        return "tap-github"
+    tap_name = "tap-github"
 
     def config_environment(self):
         return ["TAP_GITHUB_TOKEN"]
 
+    def get_config(self):
+        return {
+            "start_date": "2021-06-17",
+            "access_token": os.getenv("TAP_GITHUB_TOKEN"),
+            "repository": "singer-io/singer-tap-tester",
+            }
+
 # Check to ensure that all implementation requirements are checked
 class TestBaseTestRequirements(unittest.TestCase):
     def test_standard_tests_run_and_check(self):
-        tap_name_impl = lambda _: "tap-its-a-test"
+        tap_name_impl = "tap-its-a-test"
         config_environment_impl = lambda _: ["MY_PASSWORD_OR_TOKEN"]
+        StandardTests.subclass_requirements = ["config_environment", "tap_name"]
 
         def make_test_class(impls):
             return type('TestStandardTests',
