@@ -1,3 +1,3 @@
 # Hoist Important Classes and functions for convenience
 from . import user
-from .base import BaseTest, StandardTests
+from .base import BaseTapTest, StandardTests

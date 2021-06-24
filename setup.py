@@ -12,9 +12,11 @@ setup(name="singer-tap-tester",
       install_requires=[
       ],
       extras_require={
-          'dev': [
+          'test': [
               'ipdb',
               'pytest',
+              'pytest-subtests',
+              'tap-github',
           ]
       },
       # packages=find_packages(),

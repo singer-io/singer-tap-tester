@@ -1,11 +1,13 @@
 import io
 import inspect
+import logging
 import json
 import sys
 import unittest.mock
 import tempfile
+from contextlib import contextmanager, ExitStack
 
-# TODO: Logging
+LOGGER = logging.getLogger("singer_tap_tester.cli")
 
 class PatchStdOut():
     """
@@ -23,14 +25,14 @@ class PatchStdOut():
 
     def __init__(self):
         self.out = io.StringIO()
-    
+
     def stdout_dispatcher(self, text):
         pdb_frames = [f.filename for f in inspect.stack() if f.filename.endswith('pdb.py')]
         if pdb_frames:
             self.__old_std_out_write(text)
         else:
             self.out.write(text)
-    
+
     def __enter__(self):
         sys.stdout.write = self.stdout_dispatcher
 
@@ -51,20 +53,56 @@ def __call_entry_point(run_command):
     discovered_main = entry_points[0].resolve()
     return discovered_main()
 
-# TODO: How to structure this? I'd kind of like to just build a runner object that does all the things it needs. Might get out of control? Not sure...
-
-def run_discovery(cli_command, config):
-    # Call it with mocks and temp files to simulate CLI
+@contextmanager
+def __run_tap(tap_entry_point,config=None,catalog=None,state=None,discover=False):
     patched_io = PatchStdOut()
+    context_managers = [patched_io]
+    argvs = [tap_entry_point]
+    if discover:
+        argvs.append('--discover')
 
-    # TODO: Log the run command and write an actual file with the tap_discover_config so that we can use it in the future to get files to run for debugging
+    if config:
+        file_name = '/tmp/tap_config.json'
+        with open('/tmp/tap_config.json', 'w') as f:
+            json.dump(config, f)
+        argvs.extend(['--config', file_name])
+
+    if catalog:
+        file_name = '/tmp/tap_catalog.json'
+        with open(file_name, 'w') as f:
+            json.dump(catalog, f)
+        argvs.extend(['--catalog', file_name])
+
+    if state:
+        file_name = '/tmp/tap_state.json'
+        with open(file_name, 'w') as f:
+            json.dump(state, f)
+        argvs.extend(['--state', file_name])
+
+    LOGGER.info(f"CLI command to reproduce: {' '.join(argvs)}")
+    context_managers.append(unittest.mock.patch('sys.argv', argvs))
+
+    with ExitStack() as stack:
+        # Dynamically enter all contexts and reguster with stack to __exit__
+        # properly
+        for cm in context_managers:
+            stack.enter_context(cm)
+
+        __call_entry_point(tap_entry_point)
+        return patched_io.out.getvalue()
+
+def run_discovery(tap_entry_point, config):
+    # Call it with mocks and temp files to simulate CLI
+    LOGGER.info("Running discovery...")
+    catalog = __run_tap(tap_entry_point, config=config, discover=True)
+
+    # Run check mode so we can validate the creds. Should not sync any records
+    LOGGER.info("Running sync without catalog to validate config.")
+    __run_tap(tap_entry_point, config=config, discover=True)
+
     with patched_io, \
          tempfile.NamedTemporaryFile(mode='w') as config_file, \
-         unittest.mock.patch('sys.argv', ['tap-tester', '--discover', '--config', config_file.name]):
-        
-        json.dump(config, config_file)
-        config_file.flush()
-        __call_entry_point(cli_command)
+         unittest.mock.patch('sys.argv', ['tap-tester', '--config', config_file.name]):
+        __call_entry_point()
+    return catalog
 
-        # Return result of mocked sys.stdout
-        return patched_io.out.getvalue()
