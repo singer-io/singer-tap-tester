@@ -55,5 +55,6 @@ class TestBaseTestRequirements(unittest.TestCase):
             self.assertEqual(missing_env_var_message, str(missing_env_var.exception))
 
             # Assert Happy Path Passes
-            os.environ["MY_PASSWORD_OR_TOKEN"] = "itisset!"
-            unittest.TextTestRunner().run(unittest.makeSuite(TestStandardTestsFullImpl))
+            with open('/dev/null', 'w') as devnull:
+                os.environ["MY_PASSWORD_OR_TOKEN"] = "itisset!"
+                unittest.TextTestRunner(stream=devnull).run(unittest.makeSuite(TestStandardTestsFullImpl))
