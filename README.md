@@ -3,6 +3,8 @@ Integration testing framework for Singer taps.
 
 [NOTE: This is a big work in progress, but all are encouraged to give it a try, dig in and leave feedback as it is in development. Good luck! Hope you like it!]
 
+**See `tests/test_standard_tests.py` for a usage example of the standard canary test.**
+
 ## To Document:
 
 1. StandardTests usage example
