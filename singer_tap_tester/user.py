@@ -1,3 +1,13 @@
+"""
+This module contains tools to perform actions that are usually performed by
+a user. The most common being selection of fields and streams.
+
+### A Note on Standards ###
+All functions within this module should not modify the object passed in, but
+copy it and return a new one in order to allow for flexibility in assertions
+for test authors.
+"""
+
 from copy import deepcopy
 from collections import defaultdict
 import logging
@@ -13,41 +23,38 @@ LOG = logging.getLogger('alu_tester.user')
 # TODO: API style. Should it be immutable or mutable? I feel like for user interaction we want mutable, but who knows what the expectation is.
 
 def select_stream(catalog_entry):
-    """Appends `selected` metadata to the stream"""
+    "Appends `selected` metadata to the stream's catalog entry."
 
+    tap_stream_id = catalog_entry['tap_stream_id']
+    LOG.info(f'Selecting stream {tap_stream_id}')
     modified_entry = deepcopy(catalog_entry)
 
     for breadcrumb, md in modified_entry['metadata']:
         if breadcrumb == []:
-            modified_entry['metadata']['selected'] = 'true'
+            modified_entry['metadata']['selected'] = True
 
     return modified_entry
-
-def select_stream(catalog, stream_name):
-    return select_stream
 
 def select_all_streams(catalog):
     """Loop over a catalog and select the streams"""
 
     modified_catalog = deepcopy(catalog)
+    modified_catalog['streams'] = list(map(select_stream, modified_catalog['streams']))
 
-    for catalog_entry in modified_catalog['streams']:
-        tap_stream_id = catalog_entry['tap_stream_id']
-        LOG.info(f'Selecting stream {tap_stream_id}')
-        catalog_entry['metadata'] = [select_stream(metadata_entry)
-                                     for metadata_entry in catalog_entry['metadata']]
     return modified_catalog
 
 def select_field(metadata_entry):
-    metadata_entry['metadata']['selected'] = 'true'
-    return metadata_entry
+    modified_metadata_entry = deepcopy(metadata_entry)
+    modified_metadata_entry['metadata']['selected'] = 'true'
+    return modified_metadata_entry
 
 def select_all_fields(catalog):
-    for catalog_entry in catalog['streams']:
+    modified_catalog = deepcopy(catalog)
+    for catalog_entry in modified_catalog['streams']:
         for metadata_entry in catalog_entry['metadata']:
             if metadata_entry['breadcrumb'] is not []:
                 metadata_entry['metadata']['selected'] = 'true'
-    return catalog
+    return modified_catalog
 
 def select_all_streams_and_fields(catalog):
     modified_catalog = select_all_streams(catalog)

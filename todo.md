@@ -17,8 +17,7 @@
 2. Don't create or delete data, these should be generic, and should rely on data that already exists to test the tap's features. This is not always possible, but should be for those who are interested in the tap.
 
 ## TODO
-1. Basic Discovery Test
+X (86'd) 1. Basic Discovery Test
 2. Canary test that selects all and syncs
-3. Menagerie-esque assertion on non-discoverable metadata and tap-specific metadata (e.g., `tap-foo.*` should confirm that the tap is actually `tap-foo`)
-  - So we do kind of need a "type" or "tap-name", which would match the run command
-  - Maybe we should create an object spec or something?
+X (86'd) 3. Menagerie-esque assertion on non-discoverable metadata and tap-specific metadata (e.g., `tap-foo.*` should confirm that the tap is actually `tap-foo`)
+- Implement user.py tests

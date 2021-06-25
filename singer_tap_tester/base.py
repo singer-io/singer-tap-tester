@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from .standard_tests import test_sync_canary, test_catalog_standards
+from .standard_tests import test_sync_canary#, test_catalog_standards # TODO
 
 class EnableSubTests(type):
     """
@@ -48,7 +48,7 @@ class BaseTapTest(unittest.TestCase, metaclass=EnableSubTests):
 
 standard_test_functions = {
     test_sync_canary,
-    test_catalog_standards,
+    #test_catalog_standards, # TODO
     }
 
 class StandardTests(BaseTapTest):

@@ -1,6 +1,7 @@
 import io
 import inspect
 import logging
+import os
 import json
 import sys
 import unittest.mock
@@ -53,7 +54,7 @@ def __call_entry_point(run_command):
     discovered_main = found_entry_points[0].resolve()
     return discovered_main()
 
-@contextmanager
+
 def __run_tap(tap_entry_point,config=None,catalog=None,state=None,discover=False):
     patched_io = PatchStdOut()
     context_managers = [patched_io]
@@ -100,5 +101,11 @@ def run_discovery(tap_entry_point, config):
     LOGGER.info("Running sync without catalog to validate config.")
     __run_tap(tap_entry_point, config=config)
 
-    return catalog
+    return json.loads(catalog)
 
+def run_sync(tap_entry_point, config, catalog, state):
+
+    LOGGER.info("Running sync...")
+    raw_singer_messages = __run_tap(tap_entry_point, config=config, catalog=catalog, state=state)
+
+    return list(map(json.loads, raw_singer_messages.strip().split(os.linesep)))

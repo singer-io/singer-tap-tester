@@ -9,4 +9,5 @@ Integration testing framework for Singer taps.
 3. Purpose for the library
 4. Contribution and Vision
   - Should be clean interface
+  - Should use standards for cross-platform Python (e.g., use os.linesep instead of `\n`, and so on.
 5. Testing advice (what makes a good tap-tester test?)
