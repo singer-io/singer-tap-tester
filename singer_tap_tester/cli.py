@@ -8,7 +8,14 @@ import unittest.mock
 import tempfile
 from contextlib import contextmanager, ExitStack
 
+# TODO: Make this easier to work with?
+# TODO: Fix this, it's doubling logs now, likely due to singer-python's logger existing...
 LOGGER = logging.getLogger("singer_tap_tester.cli")
+LOGGER.setLevel(logging.INFO)
+formatter = logging.Formatter(fmt='%(levelname)s %(message)s', datefmt='')
+handler = logging.StreamHandler(sys.stderr)
+handler.setFormatter(formatter)
+LOGGER.addHandler(handler)
 
 class PatchStdOut():
     """
@@ -59,8 +66,6 @@ def __run_tap(tap_entry_point,config=None,catalog=None,state=None,discover=False
     patched_io = PatchStdOut()
     context_managers = [patched_io]
     argvs = [tap_entry_point]
-    if discover:
-        argvs.append('--discover')
 
     if config:
         file_name = '/tmp/tap_config.json'
@@ -80,11 +85,14 @@ def __run_tap(tap_entry_point,config=None,catalog=None,state=None,discover=False
             json.dump(state, f)
         argvs.extend(['--state', file_name])
 
+    if discover:
+        argvs.append('--discover')
+
     LOGGER.info(f"CLI command to reproduce: {' '.join(argvs)}")
     context_managers.append(unittest.mock.patch('sys.argv', argvs))
 
     with ExitStack() as stack:
-        # Dynamically enter all contexts and reguster with stack to __exit__
+        # Dynamically enter all contexts and register with stack to __exit__
         # properly
         for cm in context_managers:
             stack.enter_context(cm)
