@@ -9,7 +9,7 @@ import tempfile
 from contextlib import contextmanager, ExitStack
 
 # TODO: Make this easier to work with?
-# TODO: Fix this, it's doubling logs now, likely due to singer-python's logger existing...
+# FIXME: It's doubling logs now, likely due to singer-python's logger existing...
 LOGGER = logging.getLogger("singer_tap_tester.cli")
 LOGGER.setLevel(logging.INFO)
 formatter = logging.Formatter(fmt='%(levelname)s %(message)s', datefmt='')
