@@ -44,6 +44,7 @@ def select_all_streams(catalog):
 
     return modified_catalog
 
+# TODO FIXME: This should respect `"inclusion": "unsupported"`
 def select_field(metadata_entry):
     modified_metadata_entry = deepcopy(metadata_entry)
     modified_metadata_entry['metadata']['selected'] = True
