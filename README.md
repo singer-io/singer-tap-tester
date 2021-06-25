@@ -1,5 +1,5 @@
 # tap-tester
-Integration testing framework for Singer taps.
+Integration testing framework for Singer taps. This is a ***new*** library that takes lessons the original closed-source attempt at an integration testing framework in order to provide a smoother experience for tap authors to write meaningful tests that exercise the code and allow everyone to more easily verify changes against their own datasets.
 
 [NOTE: This is a big work in progress, but all are encouraged to give it a try, dig in and leave feedback as it is in development. Good luck! Hope you like it!]
 
