@@ -1,54 +1,64 @@
+"""
+This module contains tools to perform actions that are usually performed by
+a user. The most common being selection of fields and streams.
+
+### A Note on Standards ###
+All functions within this module should not modify the object passed in, but
+copy it and return a new one in order to allow for flexibility in assertions
+for test authors.
+"""
+
 from copy import deepcopy
 from collections import defaultdict
 import logging
+import sys
 
-
-LOG = logging.getLogger('alu_tester.user')
-
-# TODO: What's the proper set of API functions here? This feels too verbose, but then again, the previous one felt too terse
-# - Perhaps just having "select field" and "select stream" available, and allow folks to group them together as they see fit.
-# - No need to provide an abstraction for a "map", comprehension, or "for"
-# TODO: Can we do type hints somehow? Is that useful? Does that restrict valid Python versions too much?
-
-# TODO: API style. Should it be immutable or mutable? I feel like for user interaction we want mutable, but who knows what the expectation is.
+# TODO: Make this easier to work with?
+# FIXME: It's doubling logs now, likely due to singer-python's logger existing...
+LOGGER = logging.getLogger("singer_tap_tester.user")
+LOGGER.setLevel(logging.INFO)
+formatter = logging.Formatter(fmt='%(levelname)s %(message)s', datefmt='')
+handler = logging.StreamHandler(sys.stderr)
+handler.setFormatter(formatter)
+LOGGER.addHandler(handler)
 
 def select_stream(catalog_entry):
-    """Appends `selected` metadata to the stream"""
+    "Appends `selected` metadata to the stream's catalog entry."
+
+    tap_stream_id = catalog_entry['tap_stream_id']
+    LOGGER.info(f'Selecting stream {tap_stream_id}')
 
     modified_entry = deepcopy(catalog_entry)
 
-    for breadcrumb, md in modified_entry['metadata']:
-        if breadcrumb
-        modified_entry['metadata']['selected'] = 'true'
+    for mdata in modified_entry['metadata']:
+        if mdata['breadcrumb'] == []:
+            mdata['metadata']['selected'] = True
 
     return modified_entry
-
-def select_stream(catalog, stream_name):
-    return select_stream
 
 def select_all_streams(catalog):
     """Loop over a catalog and select the streams"""
 
     modified_catalog = deepcopy(catalog)
+    modified_catalog['streams'] = list(map(select_stream, modified_catalog['streams']))
 
-    for catalog_entry in modified_catalog['streams']:
-        tap_stream_id = catalog_entry['tap_stream_id']
-        LOG.info(f'Selecting stream {tap_stream_id}')
-        catalog_entry['metadata'] = [select_stream(metadata_entry)
-                                     for metadata_entry in catalog_entry['metadata']]
     return modified_catalog
 
+# TODO FIXME: This should respect `"inclusion": "unsupported"`
 def select_field(metadata_entry):
-    metadata_entry['metadata']['selected'] = 'true'
-    return metadata_entry
+    modified_metadata_entry = deepcopy(metadata_entry)
+    modified_metadata_entry['metadata']['selected'] = True
+    return modified_metadata_entry
 
-def select_all_fields(catalog):
-    for catalog_entry in catalog['streams']:
-        for metadata_entry in catalog_entry['metadata']:
-            if metadata_entry['breadcrumb'] is not []:
-                metadata_entry['metadata']['selected'] = 'true'
-    return catalog
+def select_all_fields(catalog_entry):
+    modified_catalog_entry = deepcopy(catalog_entry)
+
+    modified_catalog_entry['metadata'] = [select_field(m) if m['breadcrumb'] != [] else m
+                                          for m in modified_catalog_entry['metadata']]
+
+    return modified_catalog_entry
 
 def select_all_streams_and_fields(catalog):
     modified_catalog = select_all_streams(catalog)
-    return select_all_fields(modified_catalog)
+    modified_catalog['streams'] = list(map(select_all_fields, modified_catalog['streams']))
+    return modified_catalog
