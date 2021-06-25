@@ -1,6 +1,8 @@
 # tap-tester
 Integration testing framework for Singer taps.
 
+[NOTE: This is a big work in progress, but all are encouraged to give it a try, dig in and leave feedback as it is in development. Good luck! Hope you like it!]
+
 ## To Document:
 
 1. StandardTests usage example
@@ -11,3 +13,8 @@ Integration testing framework for Singer taps.
   - Should be clean interface
   - Should use standards for cross-platform Python (e.g., use os.linesep instead of `\n`, and so on.
 5. Testing advice (what makes a good tap-tester test?)
+
+## Basic Test Writing Standards (Don'ts)
+
+1. Don't import the tap code directly. This is meant to be true black-box integration testing, and importing a client library muddies that up, and may actually make a test ineffective.
+2. Don't create or delete data, these should be generic, and should rely on data that already exists to test the tap's features. This is not always possible, but should be for those who are interested in the tap.
