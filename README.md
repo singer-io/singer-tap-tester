@@ -20,3 +20,9 @@ Integration testing framework for Singer taps. This is a ***new*** library that 
 
 1. Don't import the tap code directly. This is meant to be true black-box integration testing, and importing a client library muddies that up, and may actually make a test ineffective.
 2. Don't create or delete data, these should be generic, and should rely on data that already exists to test the tap's features. This is not always possible, but should be for those who are interested in the tap.
+
+---
+
+Copyright © 2021 Stitch
+
+Distributed under the Apache License Version 2.0
