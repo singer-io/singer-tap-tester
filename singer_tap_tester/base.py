@@ -1,7 +1,7 @@
 import unittest
 import os
 
-from .standard_tests import test_sync_canary#, test_catalog_standards # TODO
+from .standard_tests import test_sync_canary, test_catalog_standards
 
 class EnableSubTests(type):
     """
@@ -46,10 +46,56 @@ class BaseTapTest(unittest.TestCase, metaclass=EnableSubTests):
         if missing_envs:
             raise Exception(f"Missing environment variables required to run the tap for this test: {missing_envs}")
 
+    # The following constants and methods will dynamically set the standard expectations
+
+    PRIMARY_KEYS = "table-key-properties"
+    REPLICATION_METHOD = "forced-replication-method"
+    REPLICATION_KEYS = "valid-replication-keys"
+    INCREMENTAL = "INCREMENTAL"
+    FULL_TABLE = "FULL_TABLE"
+
+    def expected_metadata(self):
+        """A dummy dictionary meant to be overridden in a Test<Tap>Standard class"""
+        return {}
+
+    def expected_streams(self):
+        """A set of expected stream names"""
+        return set(self.expected_metadata().keys())
+
+    def expected_primary_keys(self):
+        """
+        return a dictionary with key of stream name
+        and value as a set of primary key fields
+        """
+        return {table: properties.get(self.PRIMARY_KEYS, set())
+                for table, properties
+                in self.expected_metadata().items()}
+
+    def expected_replication_keys(self):
+        """
+        return a dictionary with key of table name
+        and value as a set of replication key fields
+        """
+        return {table: properties.get(self.REPLICATION_KEYS, set())
+                for table, properties
+                in self.expected_metadata().items()}
+
+    def expected_automatic_fields(self):
+        auto_fields = {}
+        for k, v in self.expected_metadata().items():
+            auto_fields[k] = v.get(self.PRIMARY_KEYS, set()) | v.get(self.REPLICATION_KEYS, set())
+        return auto_fields
+
+    def expected_replication_method(self):
+        """Return a dictionary with key of table name nd value of replication method"""
+        return {table: properties.get(self.REPLICATION_METHOD)
+                for table, properties
+                in self.expected_metadata().items()}
+
 standard_test_functions = {
     test_sync_canary,
-    #test_catalog_standards, # TODO
-    }
+    test_catalog_standards,
+}
 
 class StandardTests(BaseTapTest):
     """
