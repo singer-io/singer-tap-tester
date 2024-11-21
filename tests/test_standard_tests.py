@@ -5,6 +5,7 @@ from singer_tap_tester import StandardTests
 
 # Actual Usage Example
 class TestGithubStandard(StandardTests):
+
     tap_name = "tap-github"
 
     def config_environment(self):
@@ -16,6 +17,118 @@ class TestGithubStandard(StandardTests):
             "access_token": os.getenv("TAP_GITHUB_TOKEN"),
             "repository": "singer-io/singer-tap-tester",
             }
+
+    #############################
+    ### Tap Expectations
+    #############################
+
+    def expected_metadata(self):
+        """The expected streams and metadata about the streams"""
+
+        return {
+            "assignees": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            },
+            "collaborators": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            },
+            "comments": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "commit_comments": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "commits": {
+                self.PRIMARY_KEYS: {"sha"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "events": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"created_at"}
+            },
+            "issue_labels": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            },
+            "issue_milestones": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"due_on"}
+            },
+            "issue_events": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"created_at"}
+            },
+            "issues": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "pr_commits": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "project_cards": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "project_columns": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "projects": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "pull_requests": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "releases": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            },
+            "review_comments": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "reviews": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.INCREMENTAL,
+                self.REPLICATION_KEYS: {"updated_at"}
+            },
+            "stargazers": {
+                self.PRIMARY_KEYS: {"user_id"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            },
+            "team_members": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            },
+            "team_memberships": {
+                self.PRIMARY_KEYS: {"url"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            },
+            "teams": {
+                self.PRIMARY_KEYS: {"id"},
+                self.REPLICATION_METHOD: self.FULL_TABLE,
+            }
+        }
 
 # Check to ensure that all implementation requirements are checked
 class TestBaseTestRequirements(unittest.TestCase):
